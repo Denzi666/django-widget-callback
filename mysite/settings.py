@@ -31,6 +31,7 @@ SECRET_KEY = 'django-insecure-5v=c-#q-0qzn#4r+94ovy^y54@8@$f@+y6mc3bmk$3saejugen
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'django-widget-callback.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://django-widget-callback.onrender.com']
 
 
 # Application definition
