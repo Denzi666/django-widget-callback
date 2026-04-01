@@ -1,21 +1,16 @@
-class User:
-    def __init__(self, user_id, user_name, email):
-        self.user_id = user_id
-        self.user_name = user_name
-        self.email = email
+class SmartDevice:
+    def __init__(self, brand, model):
+        self.brand = brand
+        self.model = model
+    
 
-def get_user_by_id(search_id):
-    for user in database_simulation:
-        if user.user_id == search_id:
-            return user
-    return "User is not founed!"
+class SmartPhone(SmartDevice):
+    def __init__(self, brand, model, ram):
+        super().__init__(brand, model)
+        self.ram = ram
+    
+    def phone(self, number):
+        print(f"Звоним на номер {number} с телефона {self.brand}...")
 
-user1 = User(1, "Anton", "Ant@gmail.com")
-user2 = User(2, "Robert", "Rob@gmail.com")
-user3 = User(3, "Tima", "Tima@gmail.com")
-database_simulation = [user1, user2, user3]
-
-
-        
-result = get_user_by_id(3)
-print(f"Result: {result.user_name}, Email: {result.email}")
+phone1 = SmartPhone("Iphone", 15, "8(GB)")
+phone1.phone(78481754332)
