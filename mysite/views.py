@@ -2,7 +2,7 @@ import requests
 import environ
 from django.db import models
 from django.shortcuts import redirect, render
-from widget.models import Callback
+from widget.models import Callback, Company
 from django.contrib.auth.decorators import login_required
 
 env = environ.Env()
@@ -14,7 +14,21 @@ def home_page(request):
         v_phone = request.POST.get("client_phone")
         v_message = request.POST.get("client_message")
 
-        Callback.objects.create(name=v_name, phone=v_phone, message=v_message)
+        # 1. Забираем API-ключ из формы
+        v_api_key = request.POST.get("company_api_key")
+
+        # 2. Ищем компанию по ключу в базе данных
+        v_company = None
+        if v_api_key:
+            v_company = Company.objects.filter(api_key=v_api_key).first()
+
+        # 3. Создаем заявку и ПРИВЯЗЫВАЕМ компанию
+        Callback.objects.create(
+            name=v_name,
+            phone=v_phone, 
+            message=v_message,
+            company = v_company
+            )
 
         text_for_tg = (
             f"Новая заявка!\nИмя: {v_name}\nТелефон: {v_phone}\n Сообщение: {v_message}"
