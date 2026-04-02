@@ -36,6 +36,8 @@
         <form method="POST" style = "text-align: left;">
             {% csrf_token %}
             
+            <input type="hidden" name="company_api_key" value="123456789">
+
             <label>Твое имя:</label><br>
             <input type="text" name="client_name" class="form-control" required><br>
 
