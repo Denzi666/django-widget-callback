@@ -26,7 +26,11 @@ class Callback(models.Model):
     phone = models.CharField(max_length=20)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__ (self):
         return f"Заявка от {self.name}"
+    
+    class Meta:
+        verbose_name = "Обратный звонок"
+        verbose_name_plural = "Обратные звонки"
     
