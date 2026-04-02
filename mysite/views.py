@@ -18,7 +18,7 @@ def ask_ai(prompt, user_message):
     try:
         # Используем метод, который выдает ответ здесь и сейчас
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Умная, быстрая и очень дешевая модель
+            model="google/gemini-2.5-flash:free",
             messages=[
                 # Отдаем инструкцию компании (Промпт)
                 {"role": "system", "content": prompt}, 
