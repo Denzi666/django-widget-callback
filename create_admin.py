@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 username = 'admin'
 email = 'klychkov_s.66@mail.ru'  # <-- Впиши сюда свою почту
-password = '25092003Ss@'          # <-- Впиши сюда свой пароль
+password = '222'          # <-- Впиши сюда свой пароль
 
 if not User.objects.filter(username=username).exists():
     User.objects.create_superuser(username, email, password)
