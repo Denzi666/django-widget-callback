@@ -72,11 +72,14 @@ def home_page(request):
         if v_company:
             text_for_tg += f"\nКомпания: {v_company.name}"
             
-        # 3. ИИ ответ
+        # 3. ИИ ответ (Добавляем .strip(), чтобы убрать пустые невидимые строки в начале и конце)
+        ai_reply = ai_reply.strip()
+        
         if ai_reply:
             text_for_tg += f"\n\n🤖 Ответ ИИ:\n{ai_reply}"
         else:
-            text_for_tg += f"\n\n🤖 Ответ ИИ: (Пусто или не сгенерирован)"
+            # Теперь мы точно увидим, если ИИ промолчал!
+            text_for_tg += f"\n\n🤖 Ответ ИИ: ❌ Ошибка или пустой ответ"
 
         # 4. И только теперь отправляем
         send_telegram_message(text_for_tg)
