@@ -4,9 +4,36 @@ from django.db import models
 from django.shortcuts import redirect, render
 from widget.models import Callback, Company
 from django.contrib.auth.decorators import login_required
+from openai import OpenAI
 
 env = environ.Env()
 environ.Env.read_env()
+
+def ask_ai(prompt, user_message):
+    client = OpenAI(
+        api_key=env("OPENAI_API_KEY")
+    )
+
+    try:
+        # Используем метод, который выдает ответ здесь и сейчас
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # Умная, быстрая и очень дешевая модель
+            messages=[
+                # Отдаем инструкцию компании (Промпт)
+                {"role": "system", "content": prompt}, 
+                # Отдаем сообщение живого клиента с сайта
+                {"role": "user", "content": user_message} 
+            ],
+            max_tokens=500,  # Защита от слишком длинных и дорогих ответов
+            temperature=0.7  # Оптимальный баланс между строгостью и креативностью
+        )
+        
+        # Забираем из ответа только сгенерированный текст
+        return response.choices[0].message.content
+        
+    except Exception as e:
+        # Если что-то пойдет не так (например, на балансе нет денег), мы увидим ошибку
+        return f"Ошибка ИИ: {str(e)}"
 
 def home_page(request):
     if request.method == "POST":

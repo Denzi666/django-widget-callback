@@ -32,6 +32,9 @@ class Callback(models.Model):
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     message = models.TextField()
+
+    ai_response = models.TextField(verbose_name="Ответ ИИ", blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__ (self):
@@ -40,4 +43,3 @@ class Callback(models.Model):
     class Meta:
         verbose_name = "Обратный звонок"
         verbose_name_plural = "Обратные звонки"
-    
