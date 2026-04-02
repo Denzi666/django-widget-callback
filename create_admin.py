@@ -1,14 +1,13 @@
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings') # Убедись, что имя папки проекта верное
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings') 
 django.setup()
 
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-# Скрипт просто заберет данные из скрытых настроек Render!
 username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
