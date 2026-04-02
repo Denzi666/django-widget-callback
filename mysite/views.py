@@ -31,14 +31,14 @@ def home_page(request):
             )
 
         text_for_tg = (
-            f"Новая заявка!\nИмя: {v_name}\nТелефон: {v_phone}\n Сообщение: {v_message}"
+            f"Новая заявка!\nИмя: {v_name}\nТелефон: {v_phone}\nСообщение: {v_message}"
         )
 
         if v_company:
             text_for_tg += f"\nКомпания: {v_company.name}"
         else:
             text_for_tg += f"\nКомпания: Не определена (Ключ: {v_api_key})"
-            
+
         send_telegram_message(text_for_tg)
 
         return redirect("thanks_page")

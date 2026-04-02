@@ -6,6 +6,13 @@ class Company(models.Model):
     api_key = models.CharField(max_length=100, unique=True, verbose_name="Уникальный API ключ")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата регистрации")
 
+    ai_prompt = models.TextField(
+        verbose_name="Инструкция для ИИ(Промпт)",
+        blank=True,
+        null=True,
+        help_text="Здесь напиши роль бота и правила общения для этой компании."
+    )
+   
     def __str__(self):
         return self.name
 
