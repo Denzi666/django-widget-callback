@@ -49,23 +49,36 @@ def home_page(request):
         if v_api_key:
             v_company = Company.objects.filter(api_key=v_api_key).first()
 
+        ai_reply = ""
+
+        if v_company and v_company.ai_prompt:
+            ai_reply = ask_ai(v_company.ai_prompt, v_message)
+        
         # 3. Создаем заявку и ПРИВЯЗЫВАЕМ компанию
         Callback.objects.create(
             name=v_name,
             phone=v_phone, 
             message=v_message,
-            company = v_company
+            company = v_company,
+            ai_response=ai_reply
             )
 
+        # 1. Базовый текст заявки
         text_for_tg = (
             f"Новая заявка!\nИмя: {v_name}\nТелефон: {v_phone}\nСообщение: {v_message}"
         )
-
+        
+        # 2. Добавляем компанию, если она определилась
         if v_company:
             text_for_tg += f"\nКомпания: {v_company.name}"
+            
+        # 3. ИИ ответ
+        if ai_reply:
+            text_for_tg += f"\n\n🤖 Ответ ИИ:\n{ai_reply}"
         else:
-            text_for_tg += f"\nКомпания: Не определена (Ключ: {v_api_key})"
+            text_for_tg += f"\n\n🤖 Ответ ИИ: (Пусто или не сгенерирован)"
 
+        # 4. И только теперь отправляем
         send_telegram_message(text_for_tg)
 
         return redirect("thanks_page")
