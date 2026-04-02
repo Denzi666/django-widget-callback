@@ -11,7 +11,8 @@ environ.Env.read_env()
 
 def ask_ai(prompt, user_message):
     client = OpenAI(
-        api_key=env("OPENAI_API_KEY")
+        base_url="https://openrouter.ai/api/v1",
+        api_key=env("OPENROUTER_API_KEY") 
     )
 
     try:
