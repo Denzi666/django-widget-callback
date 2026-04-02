@@ -1,18 +1,23 @@
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings') # Проверь, что твой проект называется mysite
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings') # Убедись, что имя папки проекта верное
 django.setup()
 
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-username = 'admin'
-email = 'klychkov_s.66@mail.ru'  # <-- Впиши сюда свою почту
-password = '222'          # <-- Впиши сюда свой пароль
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username, email, password)
-    print("Суперпользователь успешно создан!")
+# Скрипт просто заберет данные из скрытых настроек Render!
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+if password:
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username, email, password)
+        print("Суперпользователь успешно создан!")
+    else:
+        print("Суперпользователь уже существует.")
 else:
-    print("Суперпользователь уже существует.")
+    print("Ошибка: Переменная DJANGO_SUPERUSER_PASSWORD не найдена в системе.")
