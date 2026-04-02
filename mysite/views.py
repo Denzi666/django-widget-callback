@@ -18,7 +18,7 @@ def ask_ai(prompt, user_message):
     try:
         # Используем метод, который выдает ответ здесь и сейчас
         response = client.chat.completions.create(
-            model="google/gemini-2.5-flash:free",
+            model="meta-llama/llama-3.1-8b-instruct:free",
             messages=[
                 # Отдаем инструкцию компании (Промпт)
                 {"role": "system", "content": prompt}, 
