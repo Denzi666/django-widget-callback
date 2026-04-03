@@ -1,10 +1,14 @@
 import requests
 import environ
+import json
+
+from openai import OpenAI
 from django.db import models
 from django.shortcuts import redirect, render
 from widget.models import Callback, Company
 from django.contrib.auth.decorators import login_required
-from openai import OpenAI
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 env = environ.Env()
 environ.Env.read_env()
@@ -109,3 +113,27 @@ def send_telegram_message(message_text):
     except:
         pass    
 
+@csrf_exempt
+def chat_api(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message", "")
+
+            if not user_message:
+                return JsonResponse({"error": "Сообщение пустое"}, status=400)
+            
+            system_prompt = (
+                "Ты вежливый ИИ-ассистент автосалона 'Broom'. "
+                "Твоя задача — кратко и дружелюбно отвечать на вопросы клиентов "
+                "и мотивировать их прийти на тест-драйв."
+            )
+
+            ai_response = ask_ai(system_prompt, user_message)
+
+            return JsonResponse({"reply": ai_response})
+        
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status = 500)
+        
+    return JsonResponse({"error": "Только POST запросы!"}, status = 405)
