@@ -90,8 +90,10 @@
     const chatInput = document.getElementById('chat-input');
     const messagesContainer = document.getElementById('chat-messages');
 
-    // ЛОГИКА ОТКРЫТИЯ И СВОРАЧИВАНИЯ
+    // Новая переменная кнопки очистки
+    const clearBtn = document.getElementById('clear-chat-btn');
     
+    // ЛОГИКА ОТКРЫТИЯ И СВОРАЧИВАНИЯ
     // 1. Клик по круглой кнопке -> показать окно чата, скрыть кнопку
     chatCircle.addEventListener('click', function() {
         chatWindow.style.display = 'block'; // Показываем окно
@@ -106,6 +108,28 @@
         chatCircle.style.transform = 'scale(1)'; // Кнопка "вырастает" обратно
     });
 
+    // ЛОГИКА ОЧИСТКИ ЧАТА
+    clearBtn.addEventListener('click', function() {
+        if (confirm('Вы уверены, что хотите стереть историю переписки?')) {
+            // 1. Очищаем визуально и возвращаем приветствие
+            messagesContainer.innerHTML = `<div style="margin-bottom: 10px; color: #555;"><em>ИИ: Привет! Чем я могу помочь?</em></div>`;
+            
+            // 2. Стираем сессию на бэкенде
+            fetch('/api/clear-chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Ошибка бэкенда при очистке:', data.error);
+                }
+            })
+            .catch(error => console.error('Ошибка сети при очистке:', error));
+        }
+    });
 
     // ЛОГИКА ОТПРАВКИ СООБЩЕНИЙ (осталась прежней)
 
