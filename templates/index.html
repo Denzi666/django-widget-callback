@@ -52,17 +52,18 @@
             
         </form>
     </div>
-...
+    
+    ...
     ...
     ...
 
 <div id="broom-chat-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: sans-serif;">
     
-    <div id="chat-circle" style="width: 60px; height: 60px; background-color: #007bff; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; transition: transform 0.3s ease;">
+    <div id="chat-circle" style="position: absolute; bottom: 0; right: 0; width: 60px; height: 60px; background-color: #007bff; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; transition: transform 0.3s ease, visibility 0.3s;">
         🤖
     </div>
 
-    <div id="chat-window" style="display: none; width: 320px; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: hidden; position: absolute; bottom: 80px; right: 0;">
+    <div id="chat-window" style="display: none; width: 320px; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: hidden; position: absolute; bottom: 0; right: 0;">
         
         <div style="background-color: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
             <div style="font-weight: bold; font-size: 16px;">Чат с ИИ Broom 🤖</div>
