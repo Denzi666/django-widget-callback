@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 env = environ.Env()
 environ.Env.read_env()
 
-def ask_ai(prompt, user_message):
+def ask_ai(messages_list):
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=env("OPENROUTER_API_KEY") 
@@ -24,12 +24,7 @@ def ask_ai(prompt, user_message):
         # Используем метод, который выдает ответ здесь и сейчас
         response = client.chat.completions.create(
             model="openrouter/free",
-            messages=[
-                # Отдаем инструкцию компании (Промпт)
-                {"role": "system", "content": prompt}, 
-                # Отдаем сообщение живого клиента с сайта
-                {"role": "user", "content": user_message} 
-            ],
+            messages=messages_list,
             max_tokens=500,  # Защита от слишком длинных и дорогих ответов
             temperature=0.7  # Оптимальный баланс между строгостью и креативностью
         )
