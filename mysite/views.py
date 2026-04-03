@@ -1,6 +1,7 @@
 import requests
 import environ
 import json
+import re
 
 from openai import OpenAI
 from django.db import models
@@ -123,6 +124,24 @@ def chat_api(request):
             if not user_message:
                 return JsonResponse({"error": "Сообщение пустое"}, status=400)
             
+            phone_pattern = r'(?:\+7|8)?[-( ]*\d{3}[-) ]*\d{3}[- ]*\d{2}[- ]*\d{2}|\b\d{10}\b'
+            phones = re.findall(phone_pattern, user_message)
+
+            if phones:
+                detected_phone = phones[0]
+
+                # Сохраняем его в базу данных:
+                Callback.objects.create(
+                    name="Лид из Чата 🤖", 
+                    phone=detected_phone, 
+                    message=user_message
+                )
+    
+                # Отправка номера в телеграм:
+                send_telegram_message(f"🔥 Новый лид из чата!\nТелефон: {detected_phone}\nСообщение: {user_message}")
+
+                print(f"ПЕРЕХВАЧЕН ТЕЛЕФОН: {detected_phone}")
+
             system_prompt = (
                 "Ты — опытный менеджер по продажам автосалона 'Broom'. Твоя цель — помочь клиенту "
                 "с выбором автомобиля и ОБЯЗАТЕЛЬНО мотивировать его оставить свой номер телефона "

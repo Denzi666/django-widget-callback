@@ -128,8 +128,7 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
         // Создаем и добавляем блок "Печатает..."
-        const typingId = 'typing-' + Date.now(); // Уникальный ID для этого блока
-        messagesContainer.innerHTML += `<div id="${typingId}" style="margin-bottom: 10px;">
+        messagesContainer.innerHTML += `<div id="ai-typing-status" style="margin-bottom: 10px;">
             <span style="background-color: #e9ecef; color: #666; padding: 6px 10px; border-radius: 10px; display: inline-block;">
                 <em>ИИ Broom печатает...</em>
             </span>
