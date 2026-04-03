@@ -52,5 +52,59 @@
             
         </form>
     </div>
+...
+    ...
+    ...
+
+    <div id="chat-container" style="position: fixed; bottom: 20px; right: 20px; width: 300px; border: 1px solid #ccc; background: white; padding: 10px; font-family: sans-serif; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; z-index: 9999;">
+        <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Чат с ИИ Broom 🤖</div>
+        <div id="chat-messages" style="height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; font-size: 14px; background: #fafafa;">
+            <div><em>ИИ: Привет! Чем я могу помочь?</em></div>
+        </div>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="chat-input" style="flex: 1; padding: 5px;" placeholder="Задайте вопрос...">
+            <button id="send-btn" style="padding: 5px 10px; cursor: pointer;">👉</button>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const messagesContainer = document.getElementById('chat-messages');
+        
+        messagesContainer.innerHTML += `<div><strong>Вы:</strong> ${message}</div>`;
+        input.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        fetch('/api/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.reply) {
+                messagesContainer.innerHTML += `<div><strong>ИИ:</strong> ${data.reply.replace(/\n/g, '<br>')}</div>`;
+            } else if (data.error) {
+                messagesContainer.innerHTML += `<div style="color: red;"><strong>Ошибка:</strong> ${data.error}</div>`;
+            }
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        })
+        .catch(error => {
+            messagesContainer.innerHTML += `<div style="color: red;"><strong>Ошибка сети</strong></div>`;
+            console.error('Error:', error);
+        });
+    }
+    </script>
 </body>
 </html>
