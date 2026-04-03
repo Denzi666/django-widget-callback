@@ -124,7 +124,7 @@ def chat_api(request):
             if not user_message:
                 return JsonResponse({"error": "Сообщение пустое"}, status=400)
             
-            phone_pattern = r'(?:\+7|8)?[-( ]*\d{3}[-) ]*\d{3}[- ]*\d{2}[- ]*\d{2}|\b\d{10}\b'
+            phone_pattern = r'(?:\+7|7|8)?[\s\-]?\(?[489]\d{2}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}|\b\d{10}\b'
             phones = re.findall(phone_pattern, user_message)
 
             if phones:
@@ -142,6 +142,17 @@ def chat_api(request):
 
                 print(f"ПЕРЕХВАЧЕН ТЕЛЕФОН: {detected_phone}")
 
+            # 2. РАБОТА С ПАМЯТЬЮ (СЕССИИ DJANGO)
+            # Если в сессии еще нет истории чата, создаем её
+            if 'chat_history' not in request.session:
+                request.session['chat_history'] = []
+            
+            # Достаем историю
+            chat_history = request.session['chat_history']
+            
+            # Добавляем сообщение пользователя в историю в формате OpenAI
+            chat_history.append({"role": "user", "content": user_message})    
+
             system_prompt = (
                 "Ты — опытный менеджер по продажам автосалона 'Broom'. Твоя цель — помочь клиенту "
                 "с выбором автомобиля и ОБЯЗАТЕЛЬНО мотивировать его оставить свой номер телефона "
@@ -150,8 +161,15 @@ def chat_api(request):
                 "назови пару популярных моделей (например, Geely Coolray, Haval Jolion, Lada Vesta) "
                 "и сразу спроси: 'На какой номер телефона я могу записать вас на тест-драйв, чтобы вы оценили авто лично?'"
             )
+            messages_to_ai = [{"role": "system", "content": system_prompt}] + chat_history
 
-            ai_response = ask_ai(system_prompt, user_message)
+            ai_response = ask_ai(messages_to_ai)
+
+            # Добавляем ответ ИИ в историю
+            chat_history.append({"role": "assistant", "content": ai_response})
+
+            # Сохраняем обновленную историю обратно в сессию
+            request.session['chat_history'] = chat_history
 
             return JsonResponse({"reply": ai_response})
         
