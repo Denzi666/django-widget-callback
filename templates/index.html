@@ -52,10 +52,6 @@
             
         </form>
     </div>
-    
-    ...
-    ...
-    ...
 
 <div id="broom-chat-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: sans-serif;">
     
@@ -67,7 +63,10 @@
         
         <div style="background-color: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
             <div style="font-weight: bold; font-size: 16px;">Чат с ИИ Broom 🤖</div>
-            <div id="chat-close" style="cursor: pointer; color: #aaa; font-size: 24px; line-height: 20px; font-weight: bold;">&times;</div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="clear-chat-btn" style="cursor: pointer; color: #007bff; font-size: 13px; font-weight: bold;" title="Очистить чат">Сбросить 🔄</span>
+                <div id="chat-close" style="cursor: pointer; color: #aaa; font-size: 24px; line-height: 20px; font-weight: bold;">&times;</div>
+            </div>
         </div>
 
         <div id="chat-messages" style="height: 250px; overflow-y: auto; padding: 15px; font-size: 14px; background-color: #fafafa;">
@@ -82,30 +81,27 @@
 </div>
 
 <script>
-    // Находим все нужные элементы в HTML
     const chatCircle = document.getElementById('chat-circle');
     const chatWindow = document.getElementById('chat-window');
     const chatClose = document.getElementById('chat-close');
     const sendBtn = document.getElementById('send-btn');
     const chatInput = document.getElementById('chat-input');
     const messagesContainer = document.getElementById('chat-messages');
-
+    
     // Новая переменная кнопки очистки
     const clearBtn = document.getElementById('clear-chat-btn');
-    
+
     // ЛОГИКА ОТКРЫТИЯ И СВОРАЧИВАНИЯ
-    // 1. Клик по круглой кнопке -> показать окно чата, скрыть кнопку
     chatCircle.addEventListener('click', function() {
-        chatWindow.style.display = 'block'; // Показываем окно
-        chatCircle.style.transform = 'scale(0)'; // Кнопка "сжимается" и исчезает
-        setTimeout(() => { chatCircle.style.visibility = 'hidden'; }, 300); // Полностью скрываем через 0.3 сек
+        chatWindow.style.display = 'block';
+        chatCircle.style.transform = 'scale(0)';
+        setTimeout(() => { chatCircle.style.visibility = 'hidden'; }, 300);
     });
 
-    // 2. Клик по крестику '×' в заголовке -> скрыть окно, показать кнопку
     chatClose.addEventListener('click', function() {
-        chatWindow.style.display = 'none'; // Скрываем окно
-        chatCircle.style.visibility = 'visible'; // Возвращаем видимость кнопке
-        chatCircle.style.transform = 'scale(1)'; // Кнопка "вырастает" обратно
+        chatWindow.style.display = 'none';
+        chatCircle.style.visibility = 'visible';
+        chatCircle.style.transform = 'scale(1)';
     });
 
     // ЛОГИКА ОЧИСТКИ ЧАТА
@@ -131,8 +127,7 @@
         }
     });
 
-    // ЛОГИКА ОТПРАВКИ СООБЩЕНИЙ (осталась прежней)
-
+    // ЛОГИКА ОТПРАВКИ СООБЩЕНИЙ
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') sendMessage();
@@ -142,16 +137,13 @@
         const message = chatInput.value.trim();
         if (!message) return;
 
-        // Отображаем сообщение пользователя
         messagesContainer.innerHTML += `<div style="margin-bottom: 10px; text-align: right;">
         <span style="background-color: #007bff; color: white; padding: 6px 10px; border-radius: 10px; display: inline-block;">${message}</span>
         </div>`;
         chatInput.value = '';
     
-        // Автопрокрутка вниз
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Создаем и добавляем блок "Печатает..."
         messagesContainer.innerHTML += `<div id="ai-typing-status" style="margin-bottom: 10px;">
         <span style="background-color: #e9ecef; color: #666; padding: 6px 10px; border-radius: 10px; display: inline-block;">
             <em>ИИ Broom печатает...</em>
@@ -159,7 +151,6 @@
         </div>`;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Отправляем запрос на наш Бэкенд Django
         fetch('/api/chat/', {
             method: 'POST',
             headers: {
@@ -174,10 +165,8 @@
             if (typingBlock) {
                 typingBlock.remove();
             }
-            // =============================================================
 
             if (data.reply) {
-                // Красиво отображаем ответ ИИ с переносами строк
                 const formattedReply = data.reply.replace(/\n/g, '<br>');
                 messagesContainer.innerHTML += `<div style="margin-bottom: 10px;">
                     <span style="background-color: #e9ecef; color: #333; padding: 6px 10px; border-radius: 10px; display: inline-block;"><strong>ИИ Broom:</strong><br>${formattedReply}</span>
@@ -188,12 +177,10 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         })
         .catch(error => {
-            // =============== И ЗДЕСЬ ТОЖЕ УДАЛЯЕМ ПРИ ОШИБКЕ ===============
             const typingBlock = document.getElementById('ai-typing-status');
             if (typingBlock) {
                 typingBlock.remove();
             }
-            // =============================================================
 
             messagesContainer.innerHTML += `<div style="color: red; margin-bottom: 10px;"><strong>Ошибка сети</strong></div>`;
             console.error('Error:', error);

@@ -173,3 +173,19 @@ def chat_api(request):
             return JsonResponse({"error": str(e)}, status = 500)
         
     return JsonResponse({"error": "Только POST запросы!"}, status = 405)
+
+
+@csrf_exempt
+def clear_chat_api(request):
+    if request.method == "POST":
+        try:
+            # Если в сессии браузера есть история, мы её удаляем
+            if 'chat_history' in request.session:
+                del request.session['chat_history']
+                request.session.modified = True # Принудительно сохраняем сессию
+                
+            return JsonResponse({"success": True, "message": "История очищена"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+            
+    return JsonResponse({"error": "Только POST запросы!"}, status=405)

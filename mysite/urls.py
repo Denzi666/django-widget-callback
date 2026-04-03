@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from mysite.views import home_page, thanks_page, requests_list, chat_api
+from mysite.views import home_page, thanks_page, requests_list, chat_api, clear_chat_api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +24,5 @@ urlpatterns = [
     path("thanks/", thanks_page, name="thanks_page"),
     path("requests/", requests_list, name="requests"),
     path('api/chat/', chat_api, name='chat_api'),
+    path('api/clear-chat/', clear_chat_api, name='clear_chat_api'),
 ]
