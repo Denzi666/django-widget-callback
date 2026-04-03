@@ -120,18 +120,18 @@
 
         // Отображаем сообщение пользователя
         messagesContainer.innerHTML += `<div style="margin-bottom: 10px; text-align: right;">
-            <span style="background-color: #007bff; color: white; padding: 6px 10px; border-radius: 10px; display: inline-block;">${message}</span>
+        <span style="background-color: #007bff; color: white; padding: 6px 10px; border-radius: 10px; display: inline-block;">${message}</span>
         </div>`;
         chatInput.value = '';
-        
+    
         // Автопрокрутка вниз
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
         // Создаем и добавляем блок "Печатает..."
         messagesContainer.innerHTML += `<div id="ai-typing-status" style="margin-bottom: 10px;">
-            <span style="background-color: #e9ecef; color: #666; padding: 6px 10px; border-radius: 10px; display: inline-block;">
-                <em>ИИ Broom печатает...</em>
-            </span>
+        <span style="background-color: #e9ecef; color: #666; padding: 6px 10px; border-radius: 10px; display: inline-block;">
+            <em>ИИ Broom печатает...</em>
+        </span>
         </div>`;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -145,6 +145,13 @@
         })
         .then(response => response.json())
         .then(data => {
+        
+            const typingBlock = document.getElementById('ai-typing-status');
+            if (typingBlock) {
+                typingBlock.remove();
+            }
+            // =============================================================
+
             if (data.reply) {
                 // Красиво отображаем ответ ИИ с переносами строк
                 const formattedReply = data.reply.replace(/\n/g, '<br>');
@@ -157,6 +164,13 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         })
         .catch(error => {
+            // =============== И ЗДЕСЬ ТОЖЕ УДАЛЯЕМ ПРИ ОШИБКЕ ===============
+            const typingBlock = document.getElementById('ai-typing-status');
+            if (typingBlock) {
+                typingBlock.remove();
+            }
+            // =============================================================
+
             messagesContainer.innerHTML += `<div style="color: red; margin-bottom: 10px;"><strong>Ошибка сети</strong></div>`;
             console.error('Error:', error);
         });
