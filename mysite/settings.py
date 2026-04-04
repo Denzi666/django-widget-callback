@@ -132,3 +132,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 LOGIN_URL = "/admin/login"
+
+# Сессия живет только пока открыт браузер/вкладка
+SESSION_COOKIE_AGE = 0 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
