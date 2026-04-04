@@ -63,9 +63,16 @@ def chat_api(request):
         try:
             data = json.loads(request.body)
             user_message = data.get("message", "")
+            # ЗАБИРАЕМ API-КЛЮЧ, КОТОРЫЙ ПРИШЕЛ С ФРОНТЕНДА
+            company_api_key = data.get("api_key", "")
 
             if not user_message:
                 return JsonResponse({"error": "Сообщение пустое"}, status=400)
+            
+            # ПОИСК КОМПАНИИ В БАЗЕ ДАННЫХ
+            v_company = None
+            if company_api_key:
+                v_company = Company.objects.filter(api_key=company_api_key).first()
             
             phone_pattern = r'(?:\+7|7|8)?[\s\-]?\(?[489]\d{2}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}|\b\d{10}\b'
             phones = re.findall(phone_pattern, user_message)
@@ -73,60 +80,60 @@ def chat_api(request):
             if phones:
                 detected_phone = phones[0]
 
-                # Сохраняем его в базу данных:
+                # ПРИВЯЗКА КОМПАНИИ К ЗАЯВКЕ
                 Callback.objects.create(
                     name="Лид из Чата 🤖", 
                     phone=detected_phone, 
-                    message=user_message
+                    message=user_message,
+                    company=v_company # связь с компанией
                 )
     
-                # Отправка номера в телеграм:
-                send_telegram_message(f"🔥 Новый лид из чата!\nТелефон: {detected_phone}\nСообщение: {user_message}")
+                # УВЕДОМЛЕНИЕ В ТГ 
+                tg_text = f"🔥 Новый лид из чата!\nТелефон: {detected_phone}\nСообщение: {user_message}"
+                if v_company:
+                    tg_text += f"\nКомпания: {v_company.name}"
+                
+                send_telegram_message(tg_text)
 
                 print(f"ПЕРЕХВАЧЕН ТЕЛЕФОН: {detected_phone}")
 
-            # 2. РАБОТА С ПАМЯТЬЮ (СЕССИИ DJANGO)
-            # Если в сессии еще нет истории чата, создаем её
+            # РАБОТА С ПАМЯТЬЮ (СЕССИИ DJANGO)
             if 'chat_history' not in request.session:
                 request.session['chat_history'] = []
             
-            # Достаем историю
             chat_history = request.session['chat_history']
-            
-            # Добавляем сообщение пользователя в историю в формате OpenAI
             chat_history.append({"role": "user", "content": user_message})    
 
-            system_prompt = (
-                "Ты — опытный менеджер по продажам автосалона 'Broom'. Твоя цель — помочь клиенту "
-                "с выбором автомобиля и ОБЯЗАТЕЛЬНО мотивировать его оставить свой номер телефона "
-                "для связи с менеджером или записи на тест-драйв. "
-                "Общайся вежливо, используй смайлики. Если клиент задает вопрос о наличии, "
-                "назови пару популярных моделей (Geely Coolray, Haval Jolion, Lada Vesta) "
-                "и сразу спроси: 'На какой номер телефона я могу записать вас на тест-драйв?' "
-                "ВАЖНО: Пиши ТОЛЬКО финальный ответ клиенту. Никаких рассуждений, заметок и внутренних мыслей вслух быть не должно!"
-            )
+            # Если у компании в базе прописан свой промпт — берем его! 
+            # Если нет — используем стандартный промпт автосалона Broom.
+            system_prompt = ""
+            if v_company and v_company.ai_prompt:
+                system_prompt = v_company.ai_prompt
+            else:
+                system_prompt = (
+                    "Ты — опытный менеджер по продажам автосалона 'Broom'. Твоя цель — помочь клиенту "
+                    "с выбором автомобиля и ОБЯЗАТЕЛЬНО мотивировать его оставить свой номер телефона "
+                    "для связи с менеджером или записи на тест-драйв. "
+                    "Общайся вежливо, используй смайлики. Если клиент задает вопрос о наличии, "
+                    "назови пару популярных моделей (Geely Coolray, Haval Jolion, Lada Vesta) "
+                    "и сразу спроси: 'На какой номер телефона я могу записать вас на тест-драйв?' "
+                    "ВАЖНО: Пиши ТОЛЬКО финальный ответ клиенту. Никаких рассуждений, заметок и внутренних мыслей вслух быть не должно!"
+                )
             
-            # ОГРАНИЧЕНИЕ ПАМЯТИ: берем только последние 10 сообщений из истории диалога
             limited_history = chat_history[-10:] if len(chat_history) > 10 else chat_history
-            
-            # Создаем полный список сообщений для отправки в ИИ
             messages_to_ai = [{"role": "system", "content": system_prompt}] + limited_history
 
             ai_response = ask_ai(messages_to_ai)
 
-            # Добавляем ответ ИИ в историю
             chat_history.append({"role": "assistant", "content": ai_response})
-
-            # Сохраняем обновленную историю обратно в сессию
             request.session['chat_history'] = chat_history
 
             return JsonResponse({"reply": ai_response})
         
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status = 500)
+            return JsonResponse({"error": str(e)}, status=500)
         
-    return JsonResponse({"error": "Только POST запросы!"}, status = 405)
-
+    return JsonResponse({"error": "Только POST запросы!"}, status=405)
 
 @csrf_exempt
 def clear_chat_api(request):

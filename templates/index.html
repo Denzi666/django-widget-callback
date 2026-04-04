@@ -136,12 +136,20 @@
         </div>`;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
+        // Находим скрытый инпут с ключом на странице
+        const apiKeyInput = document.querySelector('input[name="company_api_key"]');
+        const apiKey = apiKeyInput ? apiKeyInput.value : '';
+
         fetch('/api/chat/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message: message })
+            // ТЕПЕРЬ МЫ ОТПРАВЛЯЕМ И СООБЩЕНИЕ, И КЛЮЧ!
+            body: JSON.stringify({ 
+                message: message,
+                api_key: apiKey
+            })
         })
         .then(response => response.json())
         .then(data => {
