@@ -37,59 +37,7 @@ def ask_ai(messages_list):
         return f"Ошибка ИИ: {str(e)}"
 
 def home_page(request):
-    if request.method == "POST":
-        v_name = request.POST.get("client_name")
-        v_phone = request.POST.get("client_phone")
-        v_message = request.POST.get("client_message")
-
-        # 1. Забираем API-ключ из формы
-        v_api_key = request.POST.get("company_api_key")
-
-        # 2. Ищем компанию по ключу в базе данных
-        v_company = None
-        if v_api_key:
-            v_company = Company.objects.filter(api_key=v_api_key).first()
-
-        ai_reply = ""
-
-        if v_company and v_company.ai_prompt:
-            ai_reply = ask_ai(v_company.ai_prompt, v_message)
-        
-        # 3. Создаем заявку и ПРИВЯЗЫВАЕМ компанию
-        Callback.objects.create(
-            name=v_name,
-            phone=v_phone, 
-            message=v_message,
-            company = v_company,
-            ai_response=ai_reply
-            )
-
-        # 1. Базовый текст заявки
-        text_for_tg = (
-            f"Новая заявка!\nИмя: {v_name}\nТелефон: {v_phone}\nСообщение: {v_message}"
-        )
-        
-        # 2. Добавляем компанию, если она определилась
-        if v_company:
-            text_for_tg += f"\nКомпания: {v_company.name}"
-            
-        # 3. ИИ ответ (Добавляем .strip(), чтобы убрать пустые невидимые строки в начале и конце)
-        ai_reply = ai_reply.strip()
-        
-        if ai_reply:
-            text_for_tg += f"\n\n🤖 Ответ ИИ:\n{ai_reply}"
-        else:
-            # Теперь мы точно увидим, если ИИ промолчал!
-            text_for_tg += f"\n\n🤖 Ответ ИИ: ❌ Ошибка или пустой ответ"
-
-        # 4. И только теперь отправляем
-        send_telegram_message(text_for_tg)
-
-        return redirect("thanks_page")
     return render(request, "index.html")
-
-def thanks_page(request):
-    return render(request, "thanks.html")
 
 @login_required
 def requests_list(request):
@@ -157,7 +105,12 @@ def chat_api(request):
                 "и сразу спроси: 'На какой номер телефона я могу записать вас на тест-драйв?' "
                 "ВАЖНО: Пиши ТОЛЬКО финальный ответ клиенту. Никаких рассуждений, заметок и внутренних мыслей вслух быть не должно!"
             )
-            messages_to_ai = [{"role": "system", "content": system_prompt}] + chat_history
+            
+            # ОГРАНИЧЕНИЕ ПАМЯТИ: берем только последние 10 сообщений из истории диалога
+            limited_history = chat_history[-10:] if len(chat_history) > 10 else chat_history
+            
+            # Создаем полный список сообщений для отправки в ИИ
+            messages_to_ai = [{"role": "system", "content": system_prompt}] + limited_history
 
             ai_response = ask_ai(messages_to_ai)
 
